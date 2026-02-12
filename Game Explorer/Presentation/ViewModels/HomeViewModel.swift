@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 
 @MainActor
 final class HomeViewModel: ObservableObject {
@@ -31,5 +32,14 @@ final class HomeViewModel: ObservableObject {
         }
         
         isLoading = false
+    }
+    
+    func loadNextPageIfNeeded(current game: Game) {
+        guard let last = games.last else { return }
+        guard last.id == game.id else { return }
+        
+        Task {
+            await loadGames()
+        }
     }
 }

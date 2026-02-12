@@ -2,13 +2,36 @@ import SwiftUI
 import Kingfisher
 
 struct HomeView: View {
-    
+
     @StateObject var viewModel: HomeViewModel
-    
+    let container: AppContainer
+
     var body: some View {
         NavigationStack {
             content
                 .navigationTitle("Games")
+                .toolbar {
+
+                    NavigationLink("Search") {
+                        SearchView(
+                            viewModel: SearchViewModel(
+                                repository: container.gameRepository
+                            )
+                        )
+                    }
+                    
+                    NavigationLink("Favorites") {
+                        FavoritesView()
+                    }
+
+                    NavigationLink("Profile") {
+                        ProfileView(
+                            viewModel: ProfileViewModel(
+                                firebase: container.firebaseService
+                            )
+                        )
+                    }
+                }
                 .task {
                     await viewModel.loadGames()
                 }
@@ -31,22 +54,25 @@ struct HomeView: View {
             
         default:
             List(viewModel.games) { game in
-                HStack {
-                    if let url = game.backgroundImage {
-                        KFImage(URL(string: url))
-                            .resizable()
-                            .frame(width: 80, height: 60)
-                            .cornerRadius(8)
+
+                NavigationLink {
+                    DetailsView(game: game)
+                } label: {
+
+                    HStack {
+
+                        if let url = game.backgroundImage {
+                            KFImage(URL(string: url))
+                                .resizable()
+                                .frame(width: 80, height: 60)
+                                .cornerRadius(8)
+                        }
+
+                        Text(game.name)
                     }
-                    
-                    Text(game.name)
                 }
                 .onAppear {
-                    if game.id == viewModel.games.last?.id {
-                        Task {
-                            await viewModel.loadGames()
-                        }
-                    }
+                    viewModel.loadNextPageIfNeeded(current: game)
                 }
             }
         }

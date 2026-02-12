@@ -5,7 +5,7 @@ enum Endpoint {
     case search(query: String, page: Int)
     
     var url: URL {
-        let apiKey = "YOUR_RAWG_API_KEY"
+        let apiKey = Config.rawgKey
         
         switch self {
         case .games(let page):

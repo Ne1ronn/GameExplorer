@@ -12,12 +12,35 @@ final class GameRepository: GameRepositoryProtocol {
     }
     
     func fetchGames(page: Int) async throws -> [Game] {
-        let response: GameResponse = try await apiService.request(.games(page: page))
-        return response.results
+
+        do {
+            let response: GameResponse = try await apiService.request(.games(page: page))
+
+            let unique = removeDuplicates(response.results)
+
+            persistenceService.saveGames(unique)
+
+            return unique
+
+        } catch {
+
+            let cached = persistenceService.loadGames()
+
+            if cached.isEmpty {
+                throw error
+            }
+
+            return cached
+        }
     }
     
     func searchGames(query: String, page: Int) async throws -> [Game] {
         let response: GameResponse = try await apiService.request(.search(query: query, page: page))
         return response.results
+    }
+    
+    private func removeDuplicates(_ games: [Game]) -> [Game] {
+        var seen = Set<Int>()
+        return games.filter { seen.insert($0.id).inserted }
     }
 }
