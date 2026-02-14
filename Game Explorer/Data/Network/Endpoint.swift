@@ -3,20 +3,26 @@ import Foundation
 enum Endpoint {
     case games(page: Int)
     case search(query: String, page: Int)
-    
+
     var url: URL {
-        let apiKey = Config.rawgKey
-        
+        var components = URLComponents(string: "https://api.rawg.io/api/games")!
+
         switch self {
+
         case .games(let page):
-            return URL(string:
-                "https://api.rawg.io/api/games?key=\(apiKey)&page=\(page)"
-            )!
-            
+            components.queryItems = [
+                URLQueryItem(name: "key", value: Config.apiKey),
+                URLQueryItem(name: "page", value: String(page))
+            ]
+
         case .search(let query, let page):
-            return URL(string:
-                "https://api.rawg.io/api/games?key=\(apiKey)&search=\(query)&page=\(page)"
-            )!
+            components.queryItems = [
+                URLQueryItem(name: "key", value: Config.apiKey),
+                URLQueryItem(name: "search", value: query),
+                URLQueryItem(name: "page", value: String(page))
+            ]
         }
+
+        return components.url!
     }
 }

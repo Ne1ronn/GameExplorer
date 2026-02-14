@@ -18,28 +18,41 @@ final class HomeViewModel: ObservableObject {
     
     func loadGames() async {
         guard !isLoading else { return }
-        
-        state = .loading
+
+        if games.isEmpty {
+            state = .loading
+        } else {
+            state = .loadingNextPage
+        }
+
         isLoading = true
-        
+        defer { isLoading = false }
+
         do {
             let newGames = try await repository.fetchGames(page: currentPage)
+
+            if newGames.isEmpty {
+                state = games.isEmpty ? .empty : .success
+                return
+            }
+
             games.append(contentsOf: newGames)
-            state = games.isEmpty ? .empty : .success
+            state = .success
             currentPage += 1
+
         } catch {
             state = .error(error.localizedDescription)
         }
-        
-        isLoading = false
     }
     
     func loadNextPageIfNeeded(current game: Game) {
-        guard let last = games.last else { return }
-        guard last.id == game.id else { return }
-        
-        Task {
-            await loadGames()
+
+        guard !isLoading else { return }
+
+        guard let index = games.firstIndex(where: { $0.id == game.id }) else { return }
+
+        if index >= games.count - 5 {
+            Task { await loadGames() }
         }
     }
 }

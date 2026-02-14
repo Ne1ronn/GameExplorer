@@ -14,6 +14,9 @@ struct DetailsView: View {
 
                 if let image = game.backgroundImage {
                     KFImage(URL(string: image))
+                        .downsampling(size: CGSize(width: UIScreen.main.bounds.width,
+                                                   height: 220))
+                        .cancelOnDisappear(true)
                         .resizable()
                         .scaledToFill()
                         .frame(height: 220)

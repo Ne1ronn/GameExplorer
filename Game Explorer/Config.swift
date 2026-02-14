@@ -1,3 +1,14 @@
+import Foundation
+
 enum Config {
-    static let rawgKey = "bb3249d6dedf4419b13e716f4e6f527b"
+
+    static var baseURL: String {
+        Bundle.main.object(forInfoDictionaryKey: "BASE_URL") as? String ?? ""
+    }
+
+    static var apiKey: String {
+        Bundle.main.object(forInfoDictionaryKey: "API_KEY") as? String ?? "KEY_MISSING"
+    }
+
+    
 }

@@ -7,15 +7,9 @@ struct RootView: View {
     @EnvironmentObject var container: AppContainer
 
     var body: some View {
-
         if container.firebaseService.userId != nil {
 
-            HomeView(
-                viewModel: HomeViewModel(
-                    repository: container.gameRepository
-                ),
-                container: container
-            )
+            HomeView(container: container)
 
         } else {
 

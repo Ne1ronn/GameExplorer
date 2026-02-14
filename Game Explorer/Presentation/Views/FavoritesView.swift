@@ -15,6 +15,8 @@ struct FavoritesView: View {
                    !image.isEmpty {
 
                     KFImage(URL(string: image))
+                        .downsampling(size: CGSize(width: 70, height: 50))
+                        .cancelOnDisappear(true)
                         .resizable()
                         .frame(width: 70, height: 50)
                         .cornerRadius(8)

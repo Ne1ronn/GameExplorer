@@ -23,11 +23,16 @@ final class GameRepository: GameRepositoryProtocol {
             return unique
 
         } catch {
-
+            
             let cached = persistenceService.loadGames()
 
             if cached.isEmpty {
-                throw error
+
+                if (error as? URLError) != nil {
+                    throw NetworkError.noInternet
+                }
+
+                throw NetworkError.unknown
             }
 
             return cached
@@ -35,8 +40,15 @@ final class GameRepository: GameRepositoryProtocol {
     }
     
     func searchGames(query: String, page: Int) async throws -> [Game] {
-        let response: GameResponse = try await apiService.request(.search(query: query, page: page))
-        return response.results
+        do {
+            let response: GameResponse = try await apiService.request(.search(query: query, page: page))
+            return response.results
+        } catch {
+            if (error as? URLError) != nil {
+                throw NetworkError.noInternet
+            }
+            throw NetworkError.unknown
+        }
     }
     
     private func removeDuplicates(_ games: [Game]) -> [Game] {
